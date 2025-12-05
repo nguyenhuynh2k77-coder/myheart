@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<title>Trái tim 3D tương tác với nền cây cỏ</title>
+<title>Trái tim 3D xoay quanh Oy với nền cây cỏ</title>
 <style>
   html, body { margin:0; height:100%; background:#0f0f12; }
   canvas { display:block; }
@@ -108,42 +108,9 @@
       }
     });
 
-    // Kéo chuột để xoay trái tim
-    let isDragging = false;
-    let prevMouse = { x: 0, y: 0 };
-
-    window.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      prevMouse.x = e.clientX;
-      prevMouse.y = e.clientY;
-    });
-
-    window.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (isDragging) {
-        const deltaX = e.clientX - prevMouse.x;
-        const deltaY = e.clientY - prevMouse.y;
-        heart.rotation.y += deltaX * 0.01;
-        heart.rotation.x += deltaY * 0.01;
-        prevMouse.x = e.clientX;
-        prevMouse.y = e.clientY;
-      }
-    });
-
-    // Zoom bằng cuộn chuột
-    window.addEventListener('wheel', (e) => {
-      if (e.deltaY < 0) {
-        heart.scale.multiplyScalar(1.1);
-      } else {
-        heart.scale.multiplyScalar(0.9);
-      }
-    });
-
-    // Animation loop
+    // Animation: xoay quanh Oy
     function tick() {
+      heart.rotation.y += 0.015;
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
