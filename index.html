@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<title>Trái tim 3D xoay quanh Oy với nền cây cỏ</title>
+<title>Trái tim 3D tương tác với nền cây cỏ</title>
 <style>
   html, body { margin:0; height:100%; background:#0f0f12; }
   canvas { display:block; }
@@ -11,6 +11,8 @@
 <body>
   <!-- Three.js từ CDN -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <!-- OrbitControls -->
+  <script src="https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"></script>
 
   <script>
     // Renderer
@@ -22,9 +24,14 @@
 
     // Scene + Camera
     const scene = new THREE.Scene();
-
     const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
     camera.position.set(0, 40, 150);
+
+    // Controls (cho phép xoay/zoom bằng chuột)
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enablePan = false;
 
     // Ánh sáng
     const hemi = new THREE.HemisphereLight(0xffffff, 0x202030, 0.6);
@@ -48,17 +55,17 @@
     const floorGeo = new THREE.PlaneGeometry(400, 400);
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -50; // hạ sàn xuống
+    floor.position.y = -50;
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // Background cây cỏ toàn cảnh
+    // Background cây cỏ
     const loader = new THREE.TextureLoader();
     loader.load('grass.jpg', function(texture) {
       scene.background = texture;
     });
 
-    // Tạo shape trái tim 2D (Bézier), sau đó extrude để thành 3D
+    // Shape trái tim
     const heartShape = new THREE.Shape();
     const x = 0, y = 0;
     heartShape.moveTo(x + 25, y + 25);
@@ -91,18 +98,28 @@
 
     const heart = new THREE.Mesh(heartGeo, heartMat);
     heart.castShadow = true;
-
-    // Lật ngược trái tim
     heart.rotation.x = Math.PI;
-
-    // Nâng trái tim lên
     heart.position.y = 30;
-
     scene.add(heart);
 
-    // Animation: xoay quanh Oy
+    // Raycaster để bắt sự kiện click
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(heart);
+      if (intersects.length > 0) {
+        // Đổi màu khi click
+        heart.material.color.set(Math.random() * 0xffffff);
+      }
+    });
+
+    // Animation loop
     function tick() {
-      heart.rotation.y += 0.015; // xoay quanh trục Oy
+      controls.update(); // cập nhật controls
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
