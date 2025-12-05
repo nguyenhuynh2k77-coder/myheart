@@ -6,9 +6,26 @@
 <style>
   html, body { margin:0; height:100%; background:#0f0f12; }
   canvas { display:block; }
+  #rageBar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    height: 20px;
+    background: #333;
+    border: 2px solid #fff;
+  }
+  #rageFill {
+    height: 100%;
+    width: 0%;
+    background: red;
+    transition: width 0.3s;
+  }
 </style>
 </head>
 <body>
+  <div id="rageBar"><div id="rageFill"></div></div>
+
   <!-- Three.js từ CDN -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 
@@ -98,13 +115,26 @@
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
+    let rage = 0; // phần trăm thanh nộ
+
     window.addEventListener('click', (event) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObject(heart);
       if (intersects.length > 0) {
+        // Đổi màu khi click
         heart.material.color.set(Math.random() * 0xffffff);
+
+        // Tăng thanh nộ
+        rage += 20; // mỗi click tăng 20%
+        if (rage > 100) rage = 100;
+        document.getElementById('rageFill').style.width = rage + "%";
+
+        // Khi đầy thì bể trái tim
+        if (rage >= 100) {
+          scene.remove(heart);
+        }
       }
     });
 
