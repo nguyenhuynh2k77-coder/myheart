@@ -107,7 +107,7 @@
       clearcoatRoughness: 0.2
     });
 
-    const heart = new THREE.Mesh(heartGeo, heartMat);
+    let heart = new THREE.Mesh(heartGeo, heartMat);
     heart.castShadow = true;
     heart.rotation.x = Math.PI;
     heart.position.y = 30;
@@ -168,6 +168,20 @@
 
           scene.add(leftHalf);
           scene.add(rightHalf);
+
+          // Sau 4 giây hồi phục lại trái tim
+          setTimeout(() => {
+            scene.remove(leftHalf);
+            scene.remove(rightHalf);
+            rage = 0;
+            document.getElementById('rageFill').style.width = "0%";
+            heart = new THREE.Mesh(heartGeo, heartMat);
+            heart.castShadow = true;
+            heart.rotation.x = Math.PI;
+            heart.position.y = 30;
+            scene.add(heart);
+            broken = false;
+          }, 4000);
         }
       }
     });
@@ -179,7 +193,7 @@
 
         // Thanh nộ tuột từ từ nếu không click
         if (rage > 0) {
-          rage -= 0.1; // giảm dần
+          rage -= 0.1;
           if (rage < 0) rage = 0;
           document.getElementById('rageFill').style.width = rage + "%";
         }
