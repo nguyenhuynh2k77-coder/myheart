@@ -6,6 +6,7 @@
 <style>
   html, body { margin:0; height:100%; background:#0f0f12; }
   canvas { display:block; }
+  /* Thanh nộ */
   #rageBar {
     position: absolute;
     top: 20px;
@@ -24,6 +25,7 @@
 </style>
 </head>
 <body>
+  <!-- Thanh nộ -->
   <div id="rageBar"><div id="rageFill"></div></div>
 
   <!-- Three.js từ CDN -->
@@ -131,7 +133,7 @@
         if (rage > 100) rage = 100;
         document.getElementById('rageFill').style.width = rage + "%";
 
-        // Khi đầy thì bể trái tim
+        // Khi đầy thì bể trái tim (xóa khỏi scene)
         if (rage >= 100) {
           scene.remove(heart);
         }
