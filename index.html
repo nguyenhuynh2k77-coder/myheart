@@ -118,8 +118,12 @@
     const mouse = new THREE.Vector2();
 
     let rage = 0; // phần trăm thanh nộ
+    let broken = false;
+    let leftHalf, rightHalf;
 
     window.addEventListener('click', (event) => {
+      if (broken) return; // nếu đã vỡ thì không click nữa
+
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
@@ -133,16 +137,53 @@
         if (rage > 100) rage = 100;
         document.getElementById('rageFill').style.width = rage + "%";
 
-        // Khi đầy thì bể trái tim (xóa khỏi scene)
+        // Khi đầy thì bể trái tim
         if (rage >= 100) {
+          broken = true;
           scene.remove(heart);
+
+          // Tạo 2 nửa trái tim
+          const leftGeo = heartGeo.clone();
+          const rightGeo = heartGeo.clone();
+
+          const planeLeft = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+          const planeRight = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+
+          const leftMat = new THREE.MeshPhysicalMaterial({
+            color: 0xff3b6a,
+            clippingPlanes: [planeLeft],
+            side: THREE.DoubleSide
+          });
+          const rightMat = new THREE.MeshPhysicalMaterial({
+            color: 0xff3b6a,
+            clippingPlanes: [planeRight],
+            side: THREE.DoubleSide
+          });
+
+          leftHalf = new THREE.Mesh(leftGeo, leftMat);
+          rightHalf = new THREE.Mesh(rightGeo, rightMat);
+
+          leftHalf.position.copy(heart.position);
+          rightHalf.position.copy(heart.position);
+
+          scene.add(leftHalf);
+          scene.add(rightHalf);
         }
       }
     });
 
-    // Animation: xoay quanh Oy
+    // Animation: xoay quanh Oy + hiệu ứng vỡ đôi
     function tick() {
-      heart.rotation.y += 0.015; // xoay tự động quanh Oy
+      if (!broken) {
+        heart.rotation.y += 0.015; // xoay tự động quanh Oy
+      } else {
+        if (leftHalf && rightHalf) {
+          leftHalf.position.x -= 0.3;
+          leftHalf.rotation.z -= 0.02;
+          rightHalf.position.x += 0.3;
+          rightHalf.rotation.z += 0.02;
+        }
+      }
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
